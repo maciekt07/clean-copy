@@ -5,22 +5,29 @@
   "version": "1.0",
   "author": "Maciej Twaróg",
   "description": "Copy text exactly as selected - no extra links, source credits, or promotional text added by the website.",
+  "homepage_url": "https://github.com/maciekt07/clean-copy",
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": ["loader.js"],
       "run_at": "document_start"
     }
   ],
   "action": {
     "default_title": "Clean Copy",
-    "default_popup": "popup.html"
+    "default_popup": "popup/popup.html"
   },
-  "permissions": ["storage", "activeTab", "scripting", "tabs"],
+  "permissions": ["storage", "activeTab"],
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["content/cleanCopy.js", "utils/storage.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
