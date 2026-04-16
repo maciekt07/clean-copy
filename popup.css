@@ -1,0 +1,102 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "DM Mono", monospace;
+  background: #0f0f0f;
+  color: #e8e8e8;
+  width: 240px;
+  padding: 14px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.app-icon {
+  border-radius: 4px;
+}
+
+.app-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #f60;
+  letter-spacing: 0.03em;
+}
+
+.divider {
+  height: 1px;
+  background: #1e1e1e;
+  margin-bottom: 12px;
+}
+
+.domain-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+#favicon {
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.domain {
+  font-size: 11px;
+  color: #555;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.action-label {
+  font-size: 11px;
+  color: #888;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.btn {
+  flex-shrink: 0;
+  font-family: "DM Mono", monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn:hover {
+  opacity: 0.85;
+}
+
+.btn.enabled {
+  background: #1a1a1a;
+  color: #555;
+  border: 1px solid #2a2a2a;
+}
+
+.btn.disabled {
+  background: #f60;
+  color: #fff;
+  border: 1px solid #f60;
+}
