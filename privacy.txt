@@ -1,0 +1,9 @@
+Privacy Policy
+
+This extension does not collect, store, or transmit any personal data.
+
+All processing is performed locally in the browser.
+
+The extension may store user preferences (such as enabled/disabled state per website) using Chrome storage API. This data never leaves the user’s device.
+
+No data is sold, shared, or transferred to third parties.
