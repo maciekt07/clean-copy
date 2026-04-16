@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Copy text exactly as selected - no extra links, source credits, or promotional text added by the website.",
   "main": "loader.js",
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/maciekt07/clean-copy.git"
@@ -14,5 +17,8 @@
   "homepage": "https://github.com/maciekt07/clean-copy#readme",
   "devDependencies": {
     "@types/chrome": "^0.1.40"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1"
   }
 }
