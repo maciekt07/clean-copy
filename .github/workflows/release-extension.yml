@@ -1,0 +1,145 @@
+name: Release Extension
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to release from
+        required: false
+        default: main
+      version:
+        description: Version to release (defaults to package.json)
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref_name || github.event.inputs.version || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.ref || github.ref }}
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Resolve release metadata
+        id: meta
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          MANIFEST_VERSION=$(node -p "require('./manifest.json').version")
+
+          if [ "$PACKAGE_VERSION" != "$MANIFEST_VERSION" ]; then
+            echo "package.json version ($PACKAGE_VERSION) does not match manifest.json version ($MANIFEST_VERSION)." >&2
+            exit 1
+          fi
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            RAW_VERSION="${INPUT_VERSION:-$PACKAGE_VERSION}"
+            RAW_VERSION="${RAW_VERSION#v}"
+            TAG="v$RAW_VERSION"
+          else
+            TAG="$REF_NAME"
+            RAW_VERSION="${TAG#v}"
+          fi
+
+          if [ "$TAG" != "v$PACKAGE_VERSION" ]; then
+            echo "Release tag $TAG must match package.json version v$PACKAGE_VERSION." >&2
+            exit 1
+          fi
+
+          echo "version=$RAW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "asset_name=clean-copy-$TAG.zip" >> "$GITHUB_OUTPUT"
+          echo "checksum_name=clean-copy-$TAG.zip.sha256" >> "$GITHUB_OUTPUT"
+
+      - name: Create release tag
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists." >&2
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"
+
+      - name: Build extension package
+        run: pnpm build
+
+      - name: Prepare release assets
+        env:
+          ASSET_NAME: ${{ steps.meta.outputs.asset_name }}
+          CHECKSUM_NAME: ${{ steps.meta.outputs.checksum_name }}
+        run: |
+          set -euo pipefail
+
+          mv extension.zip "$ASSET_NAME"
+          sha256sum "$ASSET_NAME" > "$CHECKSUM_NAME"
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.asset_name }}
+          path: |
+            ${{ steps.meta.outputs.asset_name }}
+            ${{ steps.meta.outputs.checksum_name }}
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          ASSET_NAME: ${{ steps.meta.outputs.asset_name }}
+          CHECKSUM_NAME: ${{ steps.meta.outputs.checksum_name }}
+        run: |
+          set -euo pipefail
+
+          PRERELEASE_FLAG=""
+          if [[ "$VERSION" == *-* ]]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ASSET_NAME" "$CHECKSUM_NAME" --clobber
+          else
+            gh release create "$TAG" "$ASSET_NAME" "$CHECKSUM_NAME" \
+              --title "$TAG" \
+              --generate-notes \
+              $PRERELEASE_FLAG
+          fi
