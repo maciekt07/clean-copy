@@ -1,6 +1,6 @@
 {
   "name": "clean-copy",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Copy text exactly as selected - no extra links, source credits, or promotional text added by the website.",
   "main": "loader.js",
   "scripts": {
