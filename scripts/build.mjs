@@ -3,6 +3,8 @@ import path from "node:path";
 import os from "node:os";
 import archiver from "archiver";
 import { build as esbuild } from "esbuild";
+import { minify as minifyHtml } from "html-minifier-terser";
+import { transform as transformCss } from "lightningcss";
 
 /**
  * project root
@@ -20,7 +22,7 @@ const OUT_NAME = "extension.zip";
  * static files and folders copied as is
  * @type {string[]}
  */
-const STATIC_ASSETS = ["icons", "popup/popup.html", "popup/popup.css"];
+const STATIC_ASSETS = ["icons"];
 
 /**
  * @type {string[]}
@@ -69,6 +71,45 @@ function copyStaticAssets() {
 
     copyRecursive(src, dest);
   }
+}
+
+/**
+ * Minify popup HTML for the packaged extension.
+ * @returns {Promise<void>}
+ */
+async function writePopupHtml() {
+  const sourcePath = path.join(ROOT, "popup/popup.html");
+  const destPath = path.join(tmpDir, "popup/popup.html");
+  const source = fs.readFileSync(sourcePath, "utf8");
+  const minified = await minifyHtml(source, {
+    collapseWhitespace: true,
+    removeComments: true,
+    removeRedundantAttributes: true,
+    removeScriptTypeAttributes: true,
+    removeStyleLinkTypeAttributes: true,
+    useShortDoctype: true,
+  });
+
+  fs.mkdirSync(path.dirname(destPath), { recursive: true });
+  fs.writeFileSync(destPath, `${minified}\n`);
+}
+
+/**
+ * Minify popup CSS for the packaged extension.
+ * @returns {void}
+ */
+function writePopupCss() {
+  const sourcePath = path.join(ROOT, "popup/popup.css");
+  const destPath = path.join(tmpDir, "popup/popup.css");
+  const source = fs.readFileSync(sourcePath);
+  const result = transformCss({
+    filename: sourcePath,
+    code: source,
+    minify: true,
+  });
+
+  fs.mkdirSync(path.dirname(destPath), { recursive: true });
+  fs.writeFileSync(destPath, result.code);
 }
 
 /**
@@ -137,6 +178,8 @@ async function build() {
 
   try {
     copyStaticAssets();
+    await writePopupHtml();
+    writePopupCss();
     writeManifest();
     await bundleScripts();
     await createZip(zipPath, tmpDir);
