@@ -15,10 +15,10 @@
     "url": "https://github.com/maciekt07/clean-copy/issues"
   },
   "homepage": "https://github.com/maciekt07/clean-copy#readme",
-  "devDependencies": {
-    "@types/chrome": "^0.1.40"
-  },
   "dependencies": {
     "archiver": "^7.0.1"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.40"
   }
 }

@@ -2,6 +2,10 @@
 
 Copy text exactly as selected - no extra links, source credits, or promotional text added by the website.
 
+<a href="https://chromewebstore.google.com/detail/clean-copy/hdofpmcaoldgoghhdhlocpbmoghoeecc">
+<img width="206px" height="58px" alt="badge" src="https://developer.chrome.com/static/docs/webstore/branding/image/UV4C4ybeBTsZt43U4xis.png" />
+</a>
+
 ## Development
 
 Install dependencies:
