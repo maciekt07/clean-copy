@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./icons/icon48.png" alt="logo" />
+<img src="./public/icon/48.png" alt="logo" />
 </p>
 
 # Clean Copy
@@ -9,6 +9,7 @@ Copy text exactly as selected - no extra links, source credits, or promotional t
 ![GitHub Release](https://img.shields.io/github/v/release/maciekt07/clean-copy?color=FF530A)
 ![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/hdofpmcaoldgoghhdhlocpbmoghoeecc?color=FF530A)
 ![Chrome Web Store Size](https://img.shields.io/chrome-web-store/size/hdofpmcaoldgoghhdhlocpbmoghoeecc?color=FF530A)
+![Chrome Web Store Rating](https://img.shields.io/chrome-web-store/rating/hdofpmcaoldgoghhdhlocpbmoghoeecc?color=FF530A)
 ![GitHub License](https://img.shields.io/github/license/maciekt07/clean-copy?color=FF530A)
 
 <a href="https://chromewebstore.google.com/detail/clean-copy/hdofpmcaoldgoghhdhlocpbmoghoeecc">
@@ -23,23 +24,38 @@ Install dependencies:
 pnpm i
 ```
 
-## Build extension (create ZIP)
+Start dev server:
 
 ```bash
-pnpm run build
+pnpm dev
 ```
 
-This will generate `extension.zip` in the project root.
+For Firefox:
 
-## Load into Chrome
+```bash
+pnpm dev:firefox
+```
 
-1. Open Chrome
-2. Go to `chrome://extensions`
-3. Enable **Developer mode** (top right)
-4. Click **Load unpacked**
-5. Select the project folder (recommended for development)
+## Build
 
-Alternatively:
+```bash
+pnpm build
+```
 
-- Extract `extension.zip`
-- Use **Load unpacked** on the extracted folder
+For Firefox:
+
+```bash
+pnpm build:firefox
+```
+
+## Package (ZIP)
+
+```bash
+pnpm zip
+```
+
+For Firefox:
+
+```bash
+pnpm zip:firefox
+```
