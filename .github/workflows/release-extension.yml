@@ -75,14 +75,17 @@ jobs:
 
       - name: Zip both extensions
         run: |
-          pnpm zip          # produces .output/*-chrome-mv3.zip
-          pnpm zip:firefox  # produces .output/*-firefox-mv3.zip
+          pnpm zip
+          pnpm zip:firefox
 
       - name: Prepare assets
         run: |
           TAG="${{ steps.meta.outputs.tag }}"
-          mv .output/*-chrome-mv3.zip "clean-copy-chrome-$TAG.zip"
-          mv .output/*-firefox-mv3.zip "clean-copy-firefox-$TAG.zip"
+          VERSION="${{ steps.meta.outputs.version }}"
+
+          mv ".output/clean-copy-$VERSION-chrome.zip" "clean-copy-chrome-$TAG.zip"
+          mv ".output/clean-copy-$VERSION-firefox.zip" "clean-copy-firefox-$TAG.zip"
+
           sha256sum "clean-copy-chrome-$TAG.zip" > "clean-copy-chrome-$TAG.zip.sha256"
           sha256sum "clean-copy-firefox-$TAG.zip" > "clean-copy-firefox-$TAG.zip.sha256"
 
