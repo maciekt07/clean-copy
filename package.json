@@ -22,12 +22,24 @@
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
-    "postinstall": "wxt prepare"
+    "lint": "biome check .",
+    "format": "biome format . --write",
+    "postinstall": "wxt prepare",
+    "prepare": "husky install"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.13",
     "@playwright/test": "^1.59.1",
     "@types/chrome": "^0.1.40",
+    "husky": "^8.0.0",
+    "lint-staged": "^16.4.0",
     "typescript": "^5.9.3",
     "wxt": "^0.20.25"
+  },
+  "lint-staged": {
+    "*.{ts,js,json,html,css}": [
+      "biome format --write",
+      "biome check"
+    ]
   }
 }

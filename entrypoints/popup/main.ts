@@ -47,7 +47,7 @@ async function getActiveTab() {
 }
 
 function getHostname(url?: string): string | null {
-  if (!url || !url.startsWith("http")) return null;
+  if (!url?.startsWith("http")) return null;
 
   try {
     return new URL(url).hostname;
