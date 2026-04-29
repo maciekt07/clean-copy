@@ -5,7 +5,7 @@ export default defineConfig({
   manifestVersion: 3,
   manifest: {
     name: "Clean Copy",
-    version: "1.0.2",
+    version: "1.0.3",
     author: {
       email: "contact@maciejtwarog.dev",
     },
