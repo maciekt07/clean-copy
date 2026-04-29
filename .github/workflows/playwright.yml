@@ -1,7 +1,9 @@
-name: Extension Checks
+name: Playwright Tests
 
 on:
   push:
+    branches:
+      - main
     paths-ignore:
       - "**/*.md"
   pull_request:
@@ -30,11 +32,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build extension package
+      - name: Build extension (WXT)
         run: pnpm build
 
-      - name: Install Playwright browser
+      - name: Verify WXT output directory
+        run: ls -la .output/chrome-mv3 || (echo "Build output missing!" && exit 1)
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run extension checks
+      - name: Run Playwright tests
         run: xvfb-run --auto-servernum pnpm test

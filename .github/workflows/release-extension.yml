@@ -35,7 +35,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -48,97 +48,67 @@ jobs:
 
       - name: Resolve release metadata
         id: meta
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          INPUT_VERSION: ${{ github.event.inputs.version }}
-          REF_NAME: ${{ github.ref_name }}
         run: |
-          set -euo pipefail
-
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          MANIFEST_VERSION=$(node -p "require('./manifest.json').version")
-
-          if [ "$PACKAGE_VERSION" != "$MANIFEST_VERSION" ]; then
-            echo "package.json version ($PACKAGE_VERSION) does not match manifest.json version ($MANIFEST_VERSION)." >&2
-            exit 1
-          fi
-
-          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            RAW_VERSION="${INPUT_VERSION:-$PACKAGE_VERSION}"
-            RAW_VERSION="${RAW_VERSION#v}"
-            TAG="v$RAW_VERSION"
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${INPUT_VERSION:-$PACKAGE_VERSION}"
+            VERSION="${VERSION#v}"
+            TAG="v$VERSION"
           else
-            TAG="$REF_NAME"
-            RAW_VERSION="${TAG#v}"
+            TAG="${{ github.ref_name }}"
+            VERSION="${TAG#v}"
           fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
 
-          if [ "$TAG" != "v$PACKAGE_VERSION" ]; then
-            echo "Release tag $TAG must match package.json version v$PACKAGE_VERSION." >&2
-            exit 1
-          fi
-
-          echo "version=$RAW_VERSION" >> "$GITHUB_OUTPUT"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "asset_name=clean-copy-$TAG.zip" >> "$GITHUB_OUTPUT"
-          echo "checksum_name=clean-copy-$TAG.zip.sha256" >> "$GITHUB_OUTPUT"
-
-      - name: Create release tag
+      - name: Create release tag (if manual dispatch)
         if: github.event_name == 'workflow_dispatch'
-        env:
-          TAG: ${{ steps.meta.outputs.tag }}
         run: |
-          set -euo pipefail
+          git tag "${{ steps.meta.outputs.tag }}"
+          git push origin "${{ steps.meta.outputs.tag }}"
 
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists." >&2
-            exit 1
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "$TAG" -m "Release $TAG"
-          git push origin "$TAG"
-
-      - name: Build extension package
+      - name: Build Chrome extension
         run: pnpm build
 
-      - name: Prepare release assets
-        env:
-          ASSET_NAME: ${{ steps.meta.outputs.asset_name }}
-          CHECKSUM_NAME: ${{ steps.meta.outputs.checksum_name }}
+      - name: Build Firefox extension
+        run: pnpm build:firefox
+
+      - name: Zip both extensions
         run: |
-          set -euo pipefail
+          pnpm zip          # produces .output/*-chrome-mv3.zip
+          pnpm zip:firefox  # produces .output/*-firefox-mv3.zip
 
-          mv extension.zip "$ASSET_NAME"
-          sha256sum "$ASSET_NAME" > "$CHECKSUM_NAME"
+      - name: Prepare assets
+        run: |
+          TAG="${{ steps.meta.outputs.tag }}"
+          mv .output/*-chrome-mv3.zip "clean-copy-chrome-$TAG.zip"
+          mv .output/*-firefox-mv3.zip "clean-copy-firefox-$TAG.zip"
+          sha256sum "clean-copy-chrome-$TAG.zip" > "clean-copy-chrome-$TAG.zip.sha256"
+          sha256sum "clean-copy-firefox-$TAG.zip" > "clean-copy-firefox-$TAG.zip.sha256"
 
-      - name: Upload workflow artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.meta.outputs.asset_name }}
+          name: extension-packages
           path: |
-            ${{ steps.meta.outputs.asset_name }}
-            ${{ steps.meta.outputs.checksum_name }}
+            clean-copy-*.zip
+            clean-copy-*.zip.sha256
 
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.meta.outputs.tag }}
           VERSION: ${{ steps.meta.outputs.version }}
-          ASSET_NAME: ${{ steps.meta.outputs.asset_name }}
-          CHECKSUM_NAME: ${{ steps.meta.outputs.checksum_name }}
         run: |
-          set -euo pipefail
-
           PRERELEASE_FLAG=""
           if [[ "$VERSION" == *-* ]]; then
             PRERELEASE_FLAG="--prerelease"
           fi
 
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" "$ASSET_NAME" "$CHECKSUM_NAME" --clobber
+          if gh release view "$TAG" &>/dev/null; then
+            gh release upload "$TAG" clean-copy-*.zip clean-copy-*.zip.sha256 --clobber
           else
-            gh release create "$TAG" "$ASSET_NAME" "$CHECKSUM_NAME" \
+            gh release create "$TAG" clean-copy-*.zip clean-copy-*.zip.sha256 \
               --title "$TAG" \
               --generate-notes \
               $PRERELEASE_FLAG

@@ -2,11 +2,8 @@
   "name": "clean-copy",
   "version": "1.0.2",
   "description": "Copy text exactly as selected - no extra links, source credits, or promotional text added by the website.",
-  "main": "loader.js",
-  "scripts": {
-    "build": "node scripts/build.mjs",
-    "test": "playwright test"
-  },
+  "private": true,
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/maciekt07/clean-copy.git"
@@ -16,12 +13,33 @@
     "url": "https://github.com/maciekt07/clean-copy/issues"
   },
   "homepage": "https://github.com/maciekt07/clean-copy#readme",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "test": "playwright test",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox",
+    "compile": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome format . --write",
+    "postinstall": "wxt prepare",
+    "prepare": "husky install"
+  },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.13",
     "@playwright/test": "^1.59.1",
     "@types/chrome": "^0.1.40",
-    "archiver": "^7.0.1",
-    "esbuild": "^0.25.11",
-    "html-minifier-terser": "^7.2.0",
-    "lightningcss": "^1.30.2"
+    "husky": "^8.0.0",
+    "lint-staged": "^16.4.0",
+    "typescript": "^5.9.3",
+    "wxt": "^0.20.25"
+  },
+  "lint-staged": {
+    "*.{ts,js,json,html,css}": [
+      "biome format --write",
+      "biome check"
+    ]
   }
 }
