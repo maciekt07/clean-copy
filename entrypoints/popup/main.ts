@@ -1,4 +1,4 @@
-import "./style.css";
+import "./style.scss";
 import { browser } from "wxt/browser";
 import {
   isDomainDisabled,

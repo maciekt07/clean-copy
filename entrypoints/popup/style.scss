@@ -1,4 +1,13 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap");
+$font-mono: "DM Mono", monospace;
+$color-bg: #0f0f0f;
+$color-text: #e8e8e8;
+$color-accent: #f60;
+$color-muted: #888;
+$color-subtle: #555;
+$color-divider: #1e1e1e;
+$color-btn-bg: #1a1a1a;
+$color-btn-bdr: #2a2a2a;
+$color-white: #fff;
 
 * {
   margin: 0;
@@ -7,9 +16,9 @@
 }
 
 body {
-  font-family: "DM Mono", monospace;
-  background: #0f0f0f;
-  color: #e8e8e8;
+  font-family: $font-mono;
+  background: $color-bg;
+  color: $color-text;
   width: 240px;
   padding: 14px;
 }
@@ -28,13 +37,13 @@ header {
 .app-name {
   font-size: 13px;
   font-weight: 500;
-  color: #f60;
+  color: $color-accent;
   letter-spacing: 0.03em;
 }
 
 .divider {
   height: 1px;
-  background: #1e1e1e;
+  background: $color-divider;
   margin-bottom: 12px;
 }
 
@@ -52,7 +61,7 @@ header {
 
 .domain {
   font-size: 11px;
-  color: #555;
+  color: $color-subtle;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -67,14 +76,14 @@ header {
 
 .action-label {
   font-size: 11px;
-  color: #888;
+  color: $color-muted;
   line-height: 1.4;
   flex: 1;
 }
 
 .btn {
   flex-shrink: 0;
-  font-family: "DM Mono", monospace;
+  font-family: $font-mono;
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.05em;
@@ -83,20 +92,20 @@ header {
   border: none;
   cursor: pointer;
   transition: opacity 0.15s;
-}
 
-.btn:hover {
-  opacity: 0.85;
-}
+  &:hover {
+    opacity: 0.85;
+  }
 
-.btn.enabled {
-  background: #1a1a1a;
-  color: #555;
-  border: 1px solid #2a2a2a;
-}
+  &.enabled {
+    background: $color-btn-bg;
+    color: $color-subtle;
+    border: 1px solid $color-btn-bdr;
+  }
 
-.btn.disabled {
-  background: #f60;
-  color: #fff;
-  border: 1px solid #f60;
+  &.disabled {
+    background: $color-accent;
+    color: $color-white;
+    border: 1px solid $color-accent;
+  }
 }
