@@ -38,6 +38,10 @@
     "typescript": "^6.0.3",
     "wxt": "^0.20.26"
   },
+  "packageManager": "pnpm@10.29.3",
+  "engines": {
+    "node": "24.x"
+  },
   "lint-staged": {
     "*.{ts,js,json,html,css}": [
       "biome format --write",

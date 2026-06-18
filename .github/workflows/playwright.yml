@@ -2,41 +2,44 @@ name: Playwright Tests
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+    tags: ["v*"]
     paths-ignore:
       - "**/*.md"
   pull_request:
     paths-ignore:
       - "**/*.md"
+  workflow_call:
 
 jobs:
   extension-checks:
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .node-version
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build extension (WXT)
+      - name: Build Chrome extension (WXT)
         run: pnpm build
 
-      - name: Verify WXT output directory
-        run: ls -la .output/chrome-mv3 || (echo "Build output missing!" && exit 1)
+      - name: Build Firefox extension (WXT)
+        run: pnpm build:firefox
+
+      - name: Verify WXT output directories
+        run: |
+          ls -la .output/chrome-mv3 || (echo "Build output missing!" && exit 1)
+          ls -la .output/firefox-mv3 || (echo "Firefox build output missing!" && exit 1)
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -47,7 +50,7 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium firefox
 
       - name: Run Playwright tests
         run: xvfb-run --auto-servernum pnpm test

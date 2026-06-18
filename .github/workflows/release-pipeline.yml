@@ -1,46 +1,42 @@
-name: Release Extension
+name: Release Pipeline
 
 on:
   push:
-    tags:
-      - "v*"
-  workflow_dispatch:
-    inputs:
-      ref:
-        description: Git ref to release from
-        required: false
-        default: main
-      version:
-        description: Version to release (defaults to package.json)
-        required: false
+    tags: ["v*"]
 
 permissions:
   contents: write
 
 concurrency:
-  group: release-${{ github.workflow }}-${{ github.ref_name || github.event.inputs.version || github.run_id }}
+  group: release-pipeline-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  quality:
+    uses: ./.github/workflows/quality-checks.yml
 
+  playwright:
+    uses: ./.github/workflows/playwright.yml
+
+  release:
+    needs: [quality, playwright]
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+      version: ${{ steps.meta.outputs.version }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.ref || github.ref }}
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .node-version
           cache: pnpm
 
       - name: Install dependencies
@@ -49,23 +45,10 @@ jobs:
       - name: Resolve release metadata
         id: meta
         run: |
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            VERSION="${INPUT_VERSION:-$PACKAGE_VERSION}"
-            VERSION="${VERSION#v}"
-            TAG="v$VERSION"
-          else
-            TAG="${{ github.ref_name }}"
-            VERSION="${TAG#v}"
-          fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          TAG="${{ github.ref_name }}"
+          VERSION="${TAG#v}"
           echo "tag=$TAG" >> $GITHUB_OUTPUT
-
-      - name: Create release tag (if manual dispatch)
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          git tag "${{ steps.meta.outputs.tag }}"
-          git push origin "${{ steps.meta.outputs.tag }}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Build Chrome extension
         run: pnpm build
@@ -73,7 +56,7 @@ jobs:
       - name: Build Firefox extension
         run: pnpm build:firefox
 
-      - name: Zip both extensions
+      - name: Zip extensions
         run: |
           pnpm zip
           pnpm zip:firefox
@@ -89,13 +72,14 @@ jobs:
           sha256sum "clean-copy-chrome-$TAG.zip" > "clean-copy-chrome-$TAG.zip.sha256"
           sha256sum "clean-copy-firefox-$TAG.zip" > "clean-copy-firefox-$TAG.zip.sha256"
 
-      - name: Upload artifacts
+      - name: Upload zip artifacts (for publish job)
         uses: actions/upload-artifact@v4
         with:
-          name: extension-packages
+          name: extension-zips
           path: |
             clean-copy-*.zip
             clean-copy-*.zip.sha256
+          retention-days: 1
 
       - name: Publish GitHub release
         env:
@@ -116,3 +100,38 @@ jobs:
               --generate-notes \
               $PRERELEASE_FLAG
           fi
+
+  publish:
+    needs: [release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download zip artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: extension-zips
+
+      - name: Submit to Chrome Web Store
+        run: |
+          pnpm wxt submit \
+            --chrome-zip clean-copy-chrome-${{ needs.release.outputs.tag }}.zip
+        env:
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+          CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+          CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          CHROME_SKIP_SUBMIT_REVIEW: true
