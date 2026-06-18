@@ -3,7 +3,6 @@ name: Playwright Tests
 on:
   push:
     branches: [main]
-    tags: ["v*"]
     paths-ignore:
       - "**/*.md"
   pull_request:
