@@ -1,6 +1,6 @@
 {
   "name": "clean-copy",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Copy text exactly as selected - no extra links, source credits, or promotional text added by the website.",
   "private": true,
   "type": "module",
