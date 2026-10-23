@@ -50,7 +50,7 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium firefox
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Run Playwright tests
         run: xvfb-run --auto-servernum pnpm test:e2e
