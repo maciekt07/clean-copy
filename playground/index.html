@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Clean Copy playground</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="playground.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h1>Clean Copy playground</h1>
+      <p class="note">
+        Select the text in a case and press Cmd/Ctrl+C. The counter shows how
+        many times the page copy handler ran.
+      </p>
+      <p class="counter">
+        Page copy handler runs: <strong id="handler-count">0</strong>
+      </p>
+    </header>
+
+    <main>
+      <section data-case="plain" data-expect="Hello world">
+        <h2>Plain text (control)</h2>
+        <p class="selectable">Hello world</p>
+      </section>
+
+      <section
+        data-case="append-source"
+        data-strategy="append-source"
+        data-expect="Article text"
+      >
+        <h2>News site adds a source link</h2>
+        <p class="selectable">Article text</p>
+      </section>
+
+      <section
+        data-case="prepend-attribution"
+        data-strategy="prepend-attribution"
+        data-expect="Quote from a blog"
+      >
+        <h2>Blog adds attribution</h2>
+        <p class="selectable">Quote from a blog</p>
+      </section>
+
+      <section
+        data-case="html-with-link"
+        data-strategy="html-with-link"
+        data-expect="Some selected text"
+      >
+        <h2>Site adds a link to text/html</h2>
+        <p class="selectable">Some selected text</p>
+      </section>
+
+      <section data-case="rich-html">
+        <h2>Keep formatting from the selection</h2>
+        <p class="selectable">
+          Select <b>bold text</b> and a <a href="https://example.com/x">link</a>
+        </p>
+      </section>
+
+      <section data-case="async-clipboard" data-strategy="async-clipboard">
+        <h2>Delayed write via clipboard API (manual)</h2>
+        <p class="selectable">Text with a delayed copy handler</p>
+        <p class="note">Manual case. It is not part of the automated tests.</p>
+      </section>
+    </main>
+  </body>
+</html>

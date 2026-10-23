@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { PLAYGROUND_URL } from "@/constants/playground";
 
 export default defineConfig({
   testDir: "./tests",
@@ -13,6 +14,13 @@ export default defineConfig({
   use: {
     trace: "on-first-retry",
   },
+
+  webServer: {
+    command: "node scripts/playground-server.mjs",
+    url: PLAYGROUND_URL,
+    reuseExistingServer: !process.env.CI,
+  },
+
   projects: [
     {
       name: "chromium",

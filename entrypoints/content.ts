@@ -1,4 +1,4 @@
-import { isDomainDisabled } from "../utils/storage";
+import { isDomainDisabled } from "@/utils/storage";
 
 export default defineContentScript({
   matches: ["<all_urls>"],

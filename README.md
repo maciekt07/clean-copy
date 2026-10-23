@@ -31,16 +31,39 @@ Install dependencies:
 pnpm install
 ```
 
-Start the extension in Chrome:
+Start Chrome:
 
 ```bash
 pnpm dev
 ```
 
-Start the extension in Firefox:
+Firefox:
 
 ```bash
 pnpm dev:firefox
+```
+
+### Playground
+
+There's a small page for testing copy behavior:
+
+```bash
+pnpm dev:playground
+```
+
+Starts the playground server and `wxt dev`, then opens Chrome at `http://127.0.0.1:4173` with the extension loaded. Select some text, hit Cmd/Ctrl+C, check what landed in the clipboard.
+
+If you only need the page:
+
+```bash
+pnpm playground
+```
+
+E2E tests use the same page and start the server themselves:
+
+```bash
+pnpm build
+pnpm test:e2e
 ```
 
 ## Build

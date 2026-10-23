@@ -1,0 +1,46 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+body {
+  margin: 2rem auto;
+  max-width: 46rem;
+  padding: 0 1rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+}
+
+h2 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.note {
+  color: #777;
+}
+
+.counter {
+  margin: 0 0 1.5rem;
+}
+
+section {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin: 1rem 0;
+  padding: 1rem;
+}
+
+.selectable {
+  margin: 0;
+}
+
+button {
+  cursor: pointer;
+  font: inherit;
+  margin-top: 0.75rem;
+  padding: 0.25rem 0.75rem;
+}

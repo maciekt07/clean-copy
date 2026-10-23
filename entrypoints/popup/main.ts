@@ -3,7 +3,7 @@ import { browser } from "wxt/browser";
 import {
   isDomainDisabled,
   toggleDomain as toggleDomainInStorage,
-} from "../../utils/storage";
+} from "@/utils/storage";
 
 const btn = document.querySelector<HTMLButtonElement>("#btn");
 const domainEl = document.querySelector<HTMLSpanElement>("#domain");

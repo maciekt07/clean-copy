@@ -16,6 +16,8 @@
   "scripts": {
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",
+    "playground": "node scripts/playground-server.mjs",
+    "dev:playground": "node scripts/dev-playground.mjs",
     "test:e2e": "playwright test",
     "test:typecheck": "tsc --noEmit",
     "test:unit": "vitest run --config ./vitest.config.mts",
@@ -24,7 +26,6 @@
     "build:firefox": "wxt build -b firefox",
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
-    "compile": "tsc --noEmit",
     "lint": "biome check",
     "format": "biome format --write",
     "release": "release-it",
@@ -39,6 +40,7 @@
     "lint-staged": "^17.0.7",
     "release-it": "^20.2.0",
     "sass": "^1.100.0",
+    "sirv": "^3.0.2",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10",
     "wxt": "^0.20.26"
