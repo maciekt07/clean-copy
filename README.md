@@ -66,30 +66,28 @@ pnpm build
 pnpm test:e2e
 ```
 
-## Build
+## Release
 
-Build for Chrome:
-
-```bash
-pnpm build
-```
-
-Build for Firefox:
+Create a release with:
 
 ```bash
-pnpm build:firefox
+pnpm release
 ```
 
-## Package
+This uses [release-it](https://github.com/release-it/release-it) to:
 
-Create a Chrome ZIP:
+1. Bump the version in `package.json`
+2. Commit the change
+3. Create a git tag with the version (e.g. `v1.2.3`)
+4. Push the commit and tag, which triggers the release workflow
 
-```bash
-pnpm zip
-```
+Pushing a `v*` tag starts the [Release Pipeline](https://github.com/maciekt07/clean-copy/blob/main/.github/workflows/release-pipeline.yml) GitHub Actions workflow, which:
 
-Create a Firefox ZIP:
+1. Runs quality checks and Playwright E2E tests
+2. Builds and zips the Chrome and Firefox extensions
+3. Creates a GitHub release with both ZIPs
+4. Submits the Chrome ZIP to the Chrome Web Store for review
 
-```bash
-pnpm zip:firefox
-```
+## Credits
+
+Made by [maciekt07](https://github.com/maciekt07), licensed under [MIT](https://github.com/maciekt07/clean-copy/blob/main/LICENSE)
